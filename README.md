@@ -101,3 +101,5 @@ lib/supabase/             browser / server / middleware Supabase clients
 supabase/migrations/      SQL schema, RLS policies, realtime, seed slots
 scripts/seed-coaches.mjs  one-time coach account creation
 ```
+
+<!-- deploy check: verifying GitHub -> Vercel auto-deploy 2026-08-23T23:20:21Z -->
