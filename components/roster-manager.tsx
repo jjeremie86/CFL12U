@@ -23,7 +23,7 @@ export function RosterManager({ initialPlayers }: { initialPlayers: Player[] }) 
         supabase
           .from("players")
           .select("*")
-          .order("jersey_number", { ascending: true })
+          .order("jersey_sort", { ascending: true })
           .then(({ data }) => {
             if (data) setPlayers(data);
           });
@@ -38,8 +38,8 @@ export function RosterManager({ initialPlayers }: { initialPlayers: Player[] }) 
   async function addPlayer(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const jersey = Number(draft.jersey_number);
-    if (!draft.name.trim() || !draft.position.trim() || Number.isNaN(jersey)) {
+    const jersey = draft.jersey_number.trim();
+    if (!jersey || !draft.name.trim() || !draft.position.trim()) {
       setError("Jersey #, name, and position are required.");
       return;
     }
@@ -65,8 +65,8 @@ export function RosterManager({ initialPlayers }: { initialPlayers: Player[] }) 
   }
 
   async function saveEdit(id: string) {
-    const jersey = Number(editDraft.jersey_number);
-    if (!editDraft.name.trim() || !editDraft.position.trim() || Number.isNaN(jersey)) {
+    const jersey = editDraft.jersey_number.trim();
+    if (!jersey || !editDraft.name.trim() || !editDraft.position.trim()) {
       setError("Jersey #, name, and position are required.");
       return;
     }
@@ -94,7 +94,7 @@ export function RosterManager({ initialPlayers }: { initialPlayers: Player[] }) 
         <form onSubmit={addPlayer} className="flex flex-wrap items-end gap-3">
           <div className="w-24">
             <Input
-              type="number"
+              type="text"
               placeholder="#"
               value={draft.jersey_number}
               onChange={(e) => setDraft((d) => ({ ...d, jersey_number: e.target.value }))}
@@ -141,7 +141,7 @@ export function RosterManager({ initialPlayers }: { initialPlayers: Player[] }) 
                     <>
                       <td className="px-4 py-2">
                         <Input
-                          type="number"
+                          type="text"
                           value={editDraft.jersey_number}
                           onChange={(e) => setEditDraft((d) => ({ ...d, jersey_number: e.target.value }))}
                         />

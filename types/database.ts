@@ -3,7 +3,8 @@ export type EventKind = "practice" | "game";
 
 export type Player = {
   id: string;
-  jersey_number: number;
+  jersey_number: string;
+  jersey_sort: number;
   name: string;
   position: string;
   created_at: string;
@@ -41,7 +42,7 @@ export type DepthChartSlot = {
   updated_at: string;
 };
 
-type PlayerInsert = Partial<Player> & { jersey_number: number; name: string; position: string };
+type PlayerInsert = Partial<Player> & { jersey_number: string; name: string; position: string };
 type TeamEventInsert = Partial<TeamEvent> & { kind: EventKind; title: string; event_date: string };
 type AttendanceInsert = Partial<Attendance> & { event_id: string; player_id: string };
 type DepthChartSlotInsert = Partial<DepthChartSlot> & { side: Side; slot_label: string };

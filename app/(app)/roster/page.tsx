@@ -4,7 +4,7 @@ import { RosterManager } from "@/components/roster-manager";
 
 export default async function RosterPage() {
   const supabase = await createClient();
-  const { data: players } = await supabase.from("players").select("*").order("jersey_number", { ascending: true });
+  const { data: players } = await supabase.from("players").select("*").order("jersey_sort", { ascending: true });
 
   return (
     <div>

@@ -6,7 +6,7 @@ export default async function DepthChartPage() {
   const supabase = await createClient();
   const [{ data: slots }, { data: players }] = await Promise.all([
     supabase.from("depth_chart_slots").select("*").order("side").order("slot_order"),
-    supabase.from("players").select("*").order("jersey_number", { ascending: true }),
+    supabase.from("players").select("*").order("jersey_sort", { ascending: true }),
   ]);
 
   return (
