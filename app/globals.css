@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-chalk: "Futura", "Century Gothic", "Trebuchet MS", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Courier New", ui-monospace, "SFMono-Regular", monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #06170d;
+  color: #f2efe4;
+  font-family: var(--font-chalk);
+}
+
+@layer utilities {
+  .chalk-texture {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(242, 239, 228, 0.04), transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(242, 239, 228, 0.03), transparent 45%);
+  }
+
+  .stencil {
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+}
+
+input,
+select {
+  color-scheme: dark;
+}
+
+::selection {
+  background: #e0b04a;
+  color: #06170d;
+}
