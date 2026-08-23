@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { DepthChartSlot, Player, TeamEvent } from "@/types/database";
 import { useAttendance, formatEventDate } from "@/lib/use-attendance";
+import { useAttendanceHistory } from "@/lib/use-attendance-history";
+import { AttendanceHistoryTable, AttendanceStatTiles } from "@/components/attendance-stats";
 import { Badge, Card, EmptyState, Select } from "@/components/ui";
 
 export function GameDayBoard({ events, players }: { events: TeamEvent[]; players: Player[] }) {
@@ -14,6 +16,7 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
     events,
     players
   );
+  const history = useAttendanceHistory(events, players.length);
 
   useEffect(() => {
     async function loadSlots() {
@@ -62,6 +65,8 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
       </Card>
 
       {error ? <p className="text-sm text-flag">{error}</p> : null}
+
+      <AttendanceStatTiles present={presentCount} total={players.length} />
 
       <section>
         <h2 className="stencil mb-3 text-sm tracking-widest text-chalk-dim">Check-In</h2>
@@ -142,6 +147,11 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
             ))}
           </div>
         )}
+      </section>
+
+      <section>
+        <h2 className="stencil mb-3 text-sm tracking-widest text-chalk-dim">Attendance History</h2>
+        <AttendanceHistoryTable history={history} emptyLabel="No attendance recorded yet." />
       </section>
     </div>
   );

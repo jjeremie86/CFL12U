@@ -2,6 +2,8 @@
 
 import type { Player, TeamEvent } from "@/types/database";
 import { useAttendance, formatEventDate } from "@/lib/use-attendance";
+import { useAttendanceHistory } from "@/lib/use-attendance-history";
+import { AttendanceHistoryTable, AttendanceStatTiles } from "@/components/attendance-stats";
 import { Badge, Card, EmptyState, Select } from "@/components/ui";
 
 export function AttendanceBoard({
@@ -17,13 +19,14 @@ export function AttendanceBoard({
     events,
     players
   );
+  const history = useAttendanceHistory(events, players.length);
 
   if (events.length === 0) {
     return <EmptyState>No {eventLabel.toLowerCase()}s on the schedule yet. Add one on the Schedule screen first.</EmptyState>;
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Card className="flex flex-wrap items-center justify-between gap-3 p-4">
         <div className="min-w-[240px] flex-1">
           <Select value={selectedEventId ?? ""} onChange={(e) => setSelectedEventId(e.target.value || null)}>
@@ -42,6 +45,8 @@ export function AttendanceBoard({
       </Card>
 
       {error ? <p className="text-sm text-flag">{error}</p> : null}
+
+      <AttendanceStatTiles present={presentCount} total={players.length} />
 
       {players.length === 0 ? (
         <EmptyState>No players on the roster yet.</EmptyState>
@@ -69,6 +74,11 @@ export function AttendanceBoard({
           })}
         </div>
       )}
+
+      <section>
+        <h2 className="stencil mb-3 text-sm tracking-widest text-chalk-dim">Attendance History</h2>
+        <AttendanceHistoryTable history={history} emptyLabel="No attendance recorded yet." />
+      </section>
     </div>
   );
 }
