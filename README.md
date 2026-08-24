@@ -40,23 +40,30 @@ Visit `http://localhost:3000` — you'll be redirected to `/login`.
 
 ## 3. Create the coach accounts
 
-There's no signup form by design. Create the 8 seed accounts (Samson,
-Shannon, Reggie, Tee, Wade, Cannon, Jackson, Lafeyett Singletary) one of two
-ways:
+There's no signup form by design. Three ways to add coaches:
 
-**Dashboard (simplest for one-offs):** Authentication -> Users -> Add user,
-for each coach. Set "Auto Confirm User" so they can log in immediately.
+**In-app (easiest, once you're deployed):** sign in and open the **Coaches**
+tab. Fill in name + email, hit Add Coach, and the app shows a one-time
+temporary password to send that coach yourself (text, Slack, etc). Any
+signed-in coach can add or remove others there — it's the same flat trust
+model as the rest of the app. This requires `SUPABASE_SERVICE_ROLE_KEY` to be
+set as a **server-only** env var (see step 4) — it's never sent to the
+browser, only used inside Server Actions.
 
-**Script (for seeding all 8 at once):**
+**Dashboard (simplest for one-offs before you've deployed):** Authentication
+-> Users -> Add user, for each coach. Set "Auto Confirm User" so they can log
+in immediately.
+
+**Script (for seeding several at once from your machine):**
 
 1. Edit [`scripts/coaches.json`](scripts/coaches.json) with each coach's real
    email address.
 2. Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local`.
 3. `npm run seed:coaches`
 
-The script prints a one-time temporary password per coach — send each one to
-its coach out-of-band (text, Slack, etc.) and have them sign in and use
-Supabase's password-reset flow to set their own.
+Either the in-app screen or the script prints a one-time temporary password
+per coach — send each one to its coach out-of-band and have them sign in and
+use Supabase's password-reset flow to set their own.
 
 ## 4. Deploy
 
@@ -65,9 +72,14 @@ resistance:
 
 1. Push this repo to GitHub.
 2. Import it in Vercel, framework preset "Next.js".
-3. Add `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` as
-   environment variables (same values as `.env.local`; do **not** add the
-   service role key to the deployed app).
+3. Add environment variables (same values as `.env.local`):
+   - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` — safe to
+     expose to the browser, that's what `NEXT_PUBLIC_` means.
+   - `SUPABASE_SERVICE_ROLE_KEY` — **do not** prefix this with `NEXT_PUBLIC_`.
+     It powers the in-app Coaches screen (creating/removing coach accounts)
+     from Server Actions only; a bare `SUPABASE_SERVICE_ROLE_KEY` name never
+     reaches client-side code in Next.js. Mark it "Sensitive" in Vercel's env
+     var settings.
 4. Deploy. Share the URL with the coaching staff.
 
 ## How the data model works
@@ -96,8 +108,9 @@ app/
     practice-attendance/
     game-day/
     depth-chart/
+    coaches/               Server Actions for add/remove coach (service-role only)
 components/               shared UI kit + screen-specific client components
-lib/supabase/             browser / server / middleware Supabase clients
+lib/supabase/             browser / server / middleware / admin Supabase clients
 supabase/migrations/      SQL schema, RLS policies, realtime, seed slots
 scripts/seed-coaches.mjs  one-time coach account creation
 ```

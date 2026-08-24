@@ -11,6 +11,7 @@ const links = [
   { href: "/depth-chart", label: "Depth Chart" },
   { href: "/practice-attendance", label: "Practice" },
   { href: "/game-day", label: "Game Day" },
+  { href: "/coaches", label: "Coaches" },
 ];
 
 export function Nav({ email }: { email: string }) {
