@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { TeamEvent } from "@/types/database";
+import type { Player, TeamEvent } from "@/types/database";
 
-export type AttendanceHistoryRow = {
-  event: TeamEvent;
+export type PlayerAttendanceRow = {
+  player: Player;
   present: number;
   excused: number;
   absent: number;
@@ -15,7 +15,7 @@ export type AttendanceHistoryRow = {
 
 type Counts = { present: number; excused: number };
 
-export function useAttendanceHistory(events: TeamEvent[], totalPlayers: number) {
+export function usePlayerAttendanceSummary(events: TeamEvent[], players: Player[]) {
   const supabase = useMemo(() => createClient(), []);
   const [counts, setCounts] = useState<Record<string, Counts>>({});
   const eventIds = useMemo(() => events.map((e) => e.id), [events]);
@@ -31,16 +31,16 @@ export function useAttendanceHistory(events: TeamEvent[], totalPlayers: number) 
       }
       const { data } = await supabase
         .from("attendance")
-        .select("event_id, status")
+        .select("player_id, status")
         .in("event_id", eventIds)
         .in("status", ["present", "excused"]);
       if (!cancelled && data) {
         const next: Record<string, Counts> = {};
         for (const row of data) {
-          const bucket = next[row.event_id] ?? { present: 0, excused: 0 };
+          const bucket = next[row.player_id] ?? { present: 0, excused: 0 };
           if (row.status === "present") bucket.present += 1;
           else if (row.status === "excused") bucket.excused += 1;
-          next[row.event_id] = bucket;
+          next[row.player_id] = bucket;
         }
         setCounts(next);
       }
@@ -54,7 +54,7 @@ export function useAttendanceHistory(events: TeamEvent[], totalPlayers: number) 
     }
 
     const channel = supabase
-      .channel(`attendance-history-${eventIdsKey}`)
+      .channel(`player-attendance-summary-${eventIdsKey}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "attendance" }, () => loadCounts())
       .subscribe();
 
@@ -66,18 +66,16 @@ export function useAttendanceHistory(events: TeamEvent[], totalPlayers: number) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supabase, eventIdsKey]);
 
-  const history = useMemo<AttendanceHistoryRow[]>(() => {
-    return [...events]
-      .sort((a, b) => (a.event_date < b.event_date ? 1 : a.event_date > b.event_date ? -1 : 0))
-      .map((event) => {
-        const present = counts[event.id]?.present ?? 0;
-        const excused = counts[event.id]?.excused ?? 0;
-        const total = totalPlayers;
-        const absent = Math.max(total - present - excused, 0);
-        const pct = total > 0 ? Math.round((present / total) * 100) : 0;
-        return { event, present, excused, absent, total, pct };
-      });
-  }, [events, counts, totalPlayers]);
+  const summary = useMemo<PlayerAttendanceRow[]>(() => {
+    const total = events.length;
+    return players.map((player) => {
+      const present = counts[player.id]?.present ?? 0;
+      const excused = counts[player.id]?.excused ?? 0;
+      const absent = Math.max(total - present - excused, 0);
+      const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+      return { player, present, excused, absent, total, pct };
+    });
+  }, [players, counts, events.length]);
 
-  return history;
+  return summary;
 }

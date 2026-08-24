@@ -1,5 +1,6 @@
 export type Side = "offense" | "defense";
 export type EventKind = "practice" | "game";
+export type AttendanceStatus = "present" | "absent" | "excused";
 
 export type Player = {
   id: string;
@@ -27,7 +28,7 @@ export type Attendance = {
   id: string;
   event_id: string;
   player_id: string;
-  present: boolean;
+  status: AttendanceStatus;
   checked_in_at: string | null;
   checked_in_by: string | null;
   updated_at: string;

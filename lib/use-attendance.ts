@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Attendance, TeamEvent, Player } from "@/types/database";
+import type { Attendance, AttendanceStatus, TeamEvent, Player } from "@/types/database";
 import { pickDefaultEvent } from "@/lib/pick-default-event";
 
 export function useAttendance(events: TeamEvent[], players: Player[]) {
@@ -53,17 +53,15 @@ export function useAttendance(events: TeamEvent[], players: Player[]) {
     };
   }, [supabase, selectedEventId]);
 
-  async function togglePresent(player: Player) {
+  async function setStatus(player: Player, status: AttendanceStatus) {
     if (!selectedEventId) return;
     setError(null);
-    const current = attendance[player.id];
-    const nextPresent = !current?.present;
     const { error: upsertError } = await supabase.from("attendance").upsert(
       {
         event_id: selectedEventId,
         player_id: player.id,
-        present: nextPresent,
-        checked_in_at: nextPresent ? new Date().toISOString() : null,
+        status,
+        checked_in_at: status === "present" ? new Date().toISOString() : null,
         checked_in_by: userId,
       },
       { onConflict: "event_id,player_id" }
@@ -71,9 +69,29 @@ export function useAttendance(events: TeamEvent[], players: Player[]) {
     if (upsertError) setError(upsertError.message);
   }
 
-  const presentCount = Object.values(attendance).filter((a) => a.present).length;
+  async function togglePresent(player: Player) {
+    const current = attendance[player.id]?.status;
+    await setStatus(player, current === "present" ? "absent" : "present");
+  }
 
-  return { selectedEventId, setSelectedEventId, attendance, togglePresent, error, presentCount };
+  const statusOf = (playerId: string): AttendanceStatus => attendance[playerId]?.status ?? "absent";
+
+  const presentCount = Object.values(attendance).filter((a) => a.status === "present").length;
+  const excusedCount = Object.values(attendance).filter((a) => a.status === "excused").length;
+  const absentCount = Math.max(players.length - presentCount - excusedCount, 0);
+
+  return {
+    selectedEventId,
+    setSelectedEventId,
+    attendance,
+    statusOf,
+    setStatus,
+    togglePresent,
+    error,
+    presentCount,
+    excusedCount,
+    absentCount,
+  };
 }
 
 export function formatEventDate(isoDate: string) {

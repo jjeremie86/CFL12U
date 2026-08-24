@@ -12,10 +12,8 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
   const supabase = useMemo(() => createClient(), []);
   const [slots, setSlots] = useState<DepthChartSlot[]>([]);
 
-  const { selectedEventId, setSelectedEventId, attendance, togglePresent, error, presentCount } = useAttendance(
-    events,
-    players
-  );
+  const { selectedEventId, setSelectedEventId, statusOf, togglePresent, error, presentCount, absentCount, excusedCount } =
+    useAttendance(events, players);
   const history = useAttendanceHistory(events, players.length);
 
   useEffect(() => {
@@ -42,7 +40,7 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
   }
 
   const starters = slots.filter((slot) => slot.player_id);
-  const notCheckedIn = starters.filter((slot) => !attendance[slot.player_id!]?.present);
+  const notCheckedIn = starters.filter((slot) => statusOf(slot.player_id!) !== "present");
 
   return (
     <div className="space-y-8">
@@ -66,7 +64,7 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
 
       {error ? <p className="text-sm text-flag">{error}</p> : null}
 
-      <AttendanceStatTiles present={presentCount} total={players.length} />
+      <AttendanceStatTiles present={presentCount} absent={absentCount} excused={excusedCount} total={players.length} />
 
       <section>
         <h2 className="stencil mb-3 text-sm tracking-widest text-chalk-dim">Check-In</h2>
@@ -75,7 +73,7 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
         ) : (
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {players.map((player) => {
-              const present = attendance[player.id]?.present ?? false;
+              const present = statusOf(player.id) === "present";
               return (
                 <button
                   key={player.id}
@@ -119,7 +117,7 @@ export function GameDayBoard({ events, players }: { events: TeamEvent[]; players
                     .filter((slot) => slot.side === side)
                     .map((slot) => {
                       const player = playersById[slot.player_id!];
-                      const checkedIn = attendance[slot.player_id!]?.present;
+                      const checkedIn = statusOf(slot.player_id!) === "present";
                       return (
                         <li
                           key={slot.id}

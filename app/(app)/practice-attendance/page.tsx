@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui";
-import { AttendanceBoard } from "@/components/attendance-board";
+import { PracticeScreen } from "@/components/practice-screen";
 
 export default async function PracticeAttendancePage() {
   const supabase = await createClient();
@@ -11,8 +11,11 @@ export default async function PracticeAttendancePage() {
 
   return (
     <div>
-      <PageHeader title="Practice Attendance" subtitle="Tap a player to mark present or absent. Saves instantly for every coach." />
-      <AttendanceBoard events={events ?? []} players={players ?? []} eventLabel="Practice" />
+      <PageHeader
+        title="Practice"
+        subtitle="Schedule practices, mark Present / Absent / Excused, and track attendance over the season."
+      />
+      <PracticeScreen initialEvents={events ?? []} players={players ?? []} />
     </div>
   );
 }

@@ -12,12 +12,15 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-field-600/60 pb-4">
-      <div>
-        <h1 className="stencil text-2xl font-bold tracking-widest text-chalk">{title}</h1>
-        {subtitle ? <p className="mt-1 text-sm text-chalk-faint">{subtitle}</p> : null}
+    <div className="mb-6 border-b border-field-600/60 pb-4">
+      <div className="mb-3 h-1 w-14 rounded-full bg-gradient-to-r from-gold to-gold/20" />
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="stencil text-2xl font-bold tracking-widest text-chalk">{title}</h1>
+          {subtitle ? <p className="mt-1 text-sm text-chalk-faint">{subtitle}</p> : null}
+        </div>
+        {action}
       </div>
-      {action}
     </div>
   );
 }

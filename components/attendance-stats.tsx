@@ -1,17 +1,28 @@
 import type { ReactNode } from "react";
 import type { AttendanceHistoryRow } from "@/lib/use-attendance-history";
+import type { PlayerAttendanceRow } from "@/lib/use-player-attendance-summary";
 import { formatEventDate } from "@/lib/use-attendance";
 import { Card, EmptyState } from "@/components/ui";
 
-export function AttendanceStatTiles({ present, total }: { present: number; total: number }) {
-  const absent = Math.max(total - present, 0);
+export function AttendanceStatTiles({
+  present,
+  absent,
+  excused,
+  total,
+}: {
+  present: number;
+  absent: number;
+  excused: number;
+  total: number;
+}) {
   const pct = total > 0 ? Math.round((present / total) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
       <StatTile label="Expected" value={total} />
       <StatTile label="Present" value={present} tone="good" />
       <StatTile label="Absent" value={absent} tone="bad" />
+      <StatTile label="Excused" value={excused} tone="default" />
       <StatTile label="Attendance" value={`${pct}%`} tone="gold" />
     </div>
   );
@@ -38,13 +49,14 @@ export function AttendanceHistoryTable({ history, emptyLabel }: { history: Atten
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="stencil border-b border-field-600/60 bg-field-800/60 text-[11px] tracking-wider text-chalk-faint">
           <tr>
             <th className="px-4 py-3">Date</th>
             <th className="px-4 py-3">Present</th>
             <th className="px-4 py-3">Absent</th>
+            <th className="px-4 py-3">Excused</th>
             <th className="px-4 py-3 text-right">Attendance</th>
           </tr>
         </thead>
@@ -59,6 +71,43 @@ export function AttendanceHistoryTable({ history, emptyLabel }: { history: Atten
                 {row.present} / {row.total}
               </td>
               <td className="px-4 py-3 text-chalk-faint">{row.absent}</td>
+              <td className="px-4 py-3 text-chalk-faint">{row.excused}</td>
+              <td className="px-4 py-3 text-right font-mono text-gold">{row.pct}%</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Card>
+  );
+}
+
+export function PlayerAttendanceTable({ summary, emptyLabel }: { summary: PlayerAttendanceRow[]; emptyLabel: string }) {
+  if (summary.length === 0) {
+    return <EmptyState>{emptyLabel}</EmptyState>;
+  }
+
+  return (
+    <Card className="overflow-x-auto">
+      <table className="w-full text-left text-sm">
+        <thead className="stencil border-b border-field-600/60 bg-field-800/60 text-[11px] tracking-wider text-chalk-faint">
+          <tr>
+            <th className="px-4 py-3">Player</th>
+            <th className="px-4 py-3">Present</th>
+            <th className="px-4 py-3">Absent</th>
+            <th className="px-4 py-3">Excused</th>
+            <th className="px-4 py-3 text-right">Attendance %</th>
+          </tr>
+        </thead>
+        <tbody>
+          {summary.map((row) => (
+            <tr key={row.player.id} className="border-b border-field-700/50 last:border-0">
+              <td className="px-4 py-3">
+                <span className="mr-2 font-mono text-gold">#{row.player.jersey_number}</span>
+                <span className="text-chalk">{row.player.name}</span>
+              </td>
+              <td className="px-4 py-3 text-chalk">{row.present}</td>
+              <td className="px-4 py-3 text-chalk-faint">{row.absent}</td>
+              <td className="px-4 py-3 text-chalk-faint">{row.excused}</td>
               <td className="px-4 py-3 text-right font-mono text-gold">{row.pct}%</td>
             </tr>
           ))}
