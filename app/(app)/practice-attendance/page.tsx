@@ -11,10 +11,7 @@ export default async function PracticeAttendancePage() {
 
   return (
     <div>
-      <PageHeader
-        title="Practice"
-        subtitle="Schedule practices, mark Present / Absent / Excused, and track attendance over the season."
-      />
+      <PageHeader title="Practice" subtitle="Pick a date, mark who showed up. That's it." />
       <PracticeScreen initialEvents={events ?? []} players={players ?? []} />
     </div>
   );

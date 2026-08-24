@@ -12,17 +12,17 @@ export function AttendanceStatTiles({
 }: {
   present: number;
   absent: number;
-  excused: number;
+  excused?: number;
   total: number;
 }) {
   const pct = total > 0 ? Math.round((present / total) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+    <div className={`grid grid-cols-2 gap-3 ${excused === undefined ? "sm:grid-cols-4" : "sm:grid-cols-5"}`}>
       <StatTile label="Expected" value={total} />
       <StatTile label="Present" value={present} tone="good" />
       <StatTile label="Absent" value={absent} tone="bad" />
-      <StatTile label="Excused" value={excused} tone="default" />
+      {excused !== undefined ? <StatTile label="Excused" value={excused} tone="default" /> : null}
       <StatTile label="Attendance" value={`${pct}%`} tone="gold" />
     </div>
   );
@@ -43,7 +43,15 @@ function StatTile({ label, value, tone = "default" }: { label: string; value: Re
   );
 }
 
-export function AttendanceHistoryTable({ history, emptyLabel }: { history: AttendanceHistoryRow[]; emptyLabel: string }) {
+export function AttendanceHistoryTable({
+  history,
+  emptyLabel,
+  showExcused = true,
+}: {
+  history: AttendanceHistoryRow[];
+  emptyLabel: string;
+  showExcused?: boolean;
+}) {
   if (history.length === 0) {
     return <EmptyState>{emptyLabel}</EmptyState>;
   }
@@ -56,7 +64,7 @@ export function AttendanceHistoryTable({ history, emptyLabel }: { history: Atten
             <th className="px-4 py-3">Date</th>
             <th className="px-4 py-3">Present</th>
             <th className="px-4 py-3">Absent</th>
-            <th className="px-4 py-3">Excused</th>
+            {showExcused ? <th className="px-4 py-3">Excused</th> : null}
             <th className="px-4 py-3 text-right">Attendance</th>
           </tr>
         </thead>
@@ -71,7 +79,7 @@ export function AttendanceHistoryTable({ history, emptyLabel }: { history: Atten
                 {row.present} / {row.total}
               </td>
               <td className="px-4 py-3 text-chalk-faint">{row.absent}</td>
-              <td className="px-4 py-3 text-chalk-faint">{row.excused}</td>
+              {showExcused ? <td className="px-4 py-3 text-chalk-faint">{row.excused}</td> : null}
               <td className="px-4 py-3 text-right font-mono text-gold">{row.pct}%</td>
             </tr>
           ))}
@@ -81,7 +89,15 @@ export function AttendanceHistoryTable({ history, emptyLabel }: { history: Atten
   );
 }
 
-export function PlayerAttendanceTable({ summary, emptyLabel }: { summary: PlayerAttendanceRow[]; emptyLabel: string }) {
+export function PlayerAttendanceTable({
+  summary,
+  emptyLabel,
+  showExcused = true,
+}: {
+  summary: PlayerAttendanceRow[];
+  emptyLabel: string;
+  showExcused?: boolean;
+}) {
   if (summary.length === 0) {
     return <EmptyState>{emptyLabel}</EmptyState>;
   }
@@ -94,7 +110,7 @@ export function PlayerAttendanceTable({ summary, emptyLabel }: { summary: Player
             <th className="px-4 py-3">Player</th>
             <th className="px-4 py-3">Present</th>
             <th className="px-4 py-3">Absent</th>
-            <th className="px-4 py-3">Excused</th>
+            {showExcused ? <th className="px-4 py-3">Excused</th> : null}
             <th className="px-4 py-3 text-right">Attendance %</th>
           </tr>
         </thead>
@@ -107,7 +123,7 @@ export function PlayerAttendanceTable({ summary, emptyLabel }: { summary: Player
               </td>
               <td className="px-4 py-3 text-chalk">{row.present}</td>
               <td className="px-4 py-3 text-chalk-faint">{row.absent}</td>
-              <td className="px-4 py-3 text-chalk-faint">{row.excused}</td>
+              {showExcused ? <td className="px-4 py-3 text-chalk-faint">{row.excused}</td> : null}
               <td className="px-4 py-3 text-right font-mono text-gold">{row.pct}%</td>
             </tr>
           ))}
